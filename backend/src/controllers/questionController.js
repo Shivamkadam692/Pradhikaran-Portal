@@ -17,6 +17,7 @@ exports.create = async (req, res) => {
       submissionDeadline: new Date(submissionDeadline),
       anonymousMode: anonymousMode !== false,
       owner: req.user._id,
+      ownerDepartment: req.user.department || '',
       status: QUESTION_STATUS.DRAFT,
     });
     auditLogger.log({
@@ -48,15 +49,28 @@ exports.listMine = async (req, res) => {
 };
 
 // Researcher: list open questions (no owner identity in anonymous mode)
+// Only show questions from the same department as the researcher
 exports.listOpen = async (req, res) => {
   try {
-    const questions = await Question.find({
+    const userDepartment = req.user.department || '';
+    const filter = {
       status: QUESTION_STATUS.OPEN,
       submissionDeadline: { $gt: new Date() },
-    })
-      .select('-owner')
+    };
+    // Only filter by department if user has a department set
+    if (userDepartment) {
+      filter.ownerDepartment = userDepartment;
+    }
+    const questions = await Question.find(filter)
+      .populate('owner', 'name role department')
       .sort({ submissionDeadline: 1 });
-    const data = questions.map((q) => q.toObject());
+    const data = questions.map((q) => {
+      const obj = q.toObject();
+      if (q.anonymousMode) {
+        delete obj.owner;
+      }
+      return obj;
+    });
     res.json({ success: true, data });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
@@ -66,14 +80,21 @@ exports.listOpen = async (req, res) => {
 // Get single question (ownership or open for researchers)
 exports.getOne = async (req, res) => {
   try {
-    const question = await Question.findById(req.params.id);
+    const question = await Question.findById(req.params.id).populate('owner', 'name role department');
     if (!question) return res.status(404).json({ success: false, message: 'Question not found' });
-    const isOwner = question.owner.toString() === req.user._id.toString();
+    const isOwner = question.owner && question.owner._id.toString() === req.user._id.toString();
     if (!isOwner && question.status !== QUESTION_STATUS.OPEN && question.status !== QUESTION_STATUS.CLOSED) {
       return res.status(403).json({ success: false, message: 'Cannot access this question' });
     }
+    // For researchers, check if they're from the same department (only if both have departments set)
+    if (!isOwner && req.user.department && question.ownerDepartment && question.ownerDepartment !== req.user.department) {
+      return res.status(403).json({ success: false, message: 'You can only access questions from your department' });
+    }
     const obj = question.toObject();
-    if (question.anonymousMode && !isOwner) delete obj.owner;
+    // Always include owner info for senior members, or if not in anonymous mode
+    if (question.anonymousMode && !isOwner && req.user.role !== 'senior_member') {
+      delete obj.owner;
+    }
     res.json({ success: true, data: obj });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });

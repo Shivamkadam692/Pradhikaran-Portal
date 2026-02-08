@@ -9,8 +9,6 @@ export default function QuestionEdit() {
   const [form, setForm] = useState({
     title: '',
     description: '',
-    tags: '',
-    difficulty: 'medium',
     submissionDeadline: '',
     anonymousMode: true,
   });
@@ -24,8 +22,6 @@ export default function QuestionEdit() {
       setForm({
         title: q.title,
         description: q.description,
-        tags: (q.tags || []).join(', '),
-        difficulty: q.difficulty || 'medium',
         submissionDeadline: q.submissionDeadline ? new Date(q.submissionDeadline).toISOString().slice(0, 16) : '',
         anonymousMode: q.anonymousMode !== false,
       });
@@ -39,7 +35,8 @@ export default function QuestionEdit() {
     try {
       await questionsApi.update(id, {
         ...form,
-        tags: form.tags ? form.tags.split(',').map((t) => t.trim()).filter(Boolean) : [],
+        tags: [],
+        difficulty: 'medium',
         submissionDeadline: new Date(form.submissionDeadline).toISOString(),
       });
       navigate(`/senior/questions/${id}`);
@@ -59,8 +56,6 @@ export default function QuestionEdit() {
         {error && <div className="form-error">{error}</div>}
         <label>Title * <input value={form.title} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))} required /></label>
         <label>Description * <textarea value={form.description} onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))} required rows={6} /></label>
-        <label>Tags (comma-separated) <input value={form.tags} onChange={(e) => setForm((f) => ({ ...f, tags: e.target.value }))} /></label>
-        <label>Difficulty <select value={form.difficulty} onChange={(e) => setForm((f) => ({ ...f, difficulty: e.target.value }))}><option value="easy">Easy</option><option value="medium">Medium</option><option value="hard">Hard</option></select></label>
         <label>Submission deadline * <input type="datetime-local" value={form.submissionDeadline} onChange={(e) => setForm((f) => ({ ...f, submissionDeadline: e.target.value }))} required /></label>
         <label className="checkbox-label"><input type="checkbox" checked={form.anonymousMode} onChange={(e) => setForm((f) => ({ ...f, anonymousMode: e.target.checked }))} /> Anonymous mode</label>
         <div className="form-actions">

@@ -8,8 +8,6 @@ export default function QuestionCreate() {
   const [form, setForm] = useState({
     title: '',
     description: '',
-    tags: '',
-    difficulty: 'medium',
     submissionDeadline: '',
     anonymousMode: true,
   });
@@ -23,7 +21,8 @@ export default function QuestionCreate() {
     try {
       const payload = {
         ...form,
-        tags: form.tags ? form.tags.split(',').map((t) => t.trim()).filter(Boolean) : [],
+        tags: [],
+        difficulty: 'medium',
         submissionDeadline: new Date(form.submissionDeadline).toISOString(),
       };
       const res = await questionsApi.create(payload);
@@ -64,25 +63,6 @@ export default function QuestionCreate() {
             rows={6}
             placeholder="Full description and requirements"
           />
-        </label>
-        <label>
-          Tags (comma-separated)
-          <input
-            value={form.tags}
-            onChange={(e) => setForm((f) => ({ ...f, tags: e.target.value }))}
-            placeholder="e.g. biology, statistics"
-          />
-        </label>
-        <label>
-          Difficulty
-          <select
-            value={form.difficulty}
-            onChange={(e) => setForm((f) => ({ ...f, difficulty: e.target.value }))}
-          >
-            <option value="easy">Easy</option>
-            <option value="medium">Medium</option>
-            <option value="hard">Hard</option>
-          </select>
         </label>
         <label>
           Submission deadline *

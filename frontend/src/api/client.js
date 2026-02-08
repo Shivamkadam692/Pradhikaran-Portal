@@ -1,6 +1,4 @@
-/**
- * Axios instance - base URL and auth header from localStorage token.
- */
+
 import axios from 'axios';
 
 const client = axios.create({

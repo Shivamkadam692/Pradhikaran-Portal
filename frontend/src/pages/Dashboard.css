@@ -28,7 +28,7 @@
 .empty-state {
   text-align: center;
   padding: 3rem;
-  background: var(--surface);
+  background: var(--surface-alt);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   color: var(--text-muted);
@@ -45,7 +45,13 @@
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 1.25rem;
+  padding: 1.5rem;
+  box-shadow: var(--shadow);
+  transition: box-shadow 0.2s, transform 0.1s;
+}
+.card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
 }
 
 .card-head {
@@ -70,10 +76,10 @@
   border-radius: 4px;
   text-transform: uppercase;
 }
-.status-draft { background: rgba(139, 148, 158, 0.3); color: var(--text-muted); }
-.status-open { background: rgba(63, 185, 80, 0.2); color: var(--success); }
-.status-closed { background: rgba(210, 153, 34, 0.2); color: var(--warning); }
-.status-completed { background: rgba(63, 185, 80, 0.2); color: var(--success); }
+.status-draft { background: var(--surface-alt); color: var(--text-muted); border: 1px solid var(--border); }
+.status-open { background: var(--success-light); color: var(--success); border: 1px solid var(--success); }
+.status-closed { background: var(--warning-light); color: #856404; border: 1px solid var(--warning); }
+.status-completed { background: var(--success-light); color: var(--success); border: 1px solid var(--success); }
 
 .card-desc {
   margin: 0.5rem 0;

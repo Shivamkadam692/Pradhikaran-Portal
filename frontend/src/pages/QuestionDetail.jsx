@@ -81,10 +81,14 @@ export default function QuestionDetail() {
         <h1>{question.title}</h1>
         <span className={`status status-${question.status}`}>{question.status}</span>
       </div>
+      {question.owner && (
+        <div className="question-owner-info" style={{ marginBottom: '1rem', padding: '0.75rem', background: '#f5f5f5', borderRadius: '4px' }}>
+          <strong>Question by:</strong> {question.owner.name} | <strong>Role:</strong> {question.owner.role === 'senior_member' ? 'Senior Member' : 'Researcher'} | <strong>Department:</strong> {question.owner.department}
+        </div>
+      )}
       <p className="detail-desc">{question.description}</p>
       <div className="detail-meta">
         <span>Deadline: {formatDate(question.submissionDeadline)}</span>
-        {Array.isArray(question.tags) && question.tags.length > 0 && <span>Tags: {question.tags.join(', ')}</span>}
       </div>
 
       {question.status === 'draft' && (

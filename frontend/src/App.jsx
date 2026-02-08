@@ -6,6 +6,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import SeniorDashboard from './pages/SeniorDashboard';
 import ResearcherDashboard from './pages/ResearcherDashboard';
+import ResearcherLanding from './pages/ResearcherLanding';
 import QuestionCreate from './pages/QuestionCreate';
 import QuestionDetail from './pages/QuestionDetail';
 import AnswerEditor from './pages/AnswerEditor';
@@ -71,6 +72,14 @@ export default function App() {
         element={
           <ProtectedRoute allowedRoles={['senior_member']}>
             <Layout><Analytics /></Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/researcher/landing"
+        element={
+          <ProtectedRoute allowedRoles={['researcher']}>
+            <Layout><ResearcherLanding /></Layout>
           </ProtectedRoute>
         }
       />

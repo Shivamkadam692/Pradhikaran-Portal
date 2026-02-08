@@ -45,6 +45,13 @@ const questionSchema = new mongoose.Schema(
       ref: 'User',
       required: true,
     },
+    // Department of the owner (for filtering questions by department)
+    ownerDepartment: {
+      type: String,
+      required: false, // Made optional for backward compatibility
+      trim: true,
+      default: '',
+    },
     // Compiled final answer (set when senior compiles and approves)
     compiledAnswer: {
       content: String,

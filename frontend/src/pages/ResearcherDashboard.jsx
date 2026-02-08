@@ -45,8 +45,6 @@ export default function ResearcherDashboard() {
               <p className="card-desc">{q.description?.slice(0, 160)}...</p>
               <div className="card-meta">
                 <span>Submit by: {formatDate(q.submissionDeadline)}</span>
-                {Array.isArray(q.tags) && q.tags.length > 0 && <span>{q.tags.join(', ')}</span>}
-                {q.difficulty && <span className="difficulty">{q.difficulty}</span>}
               </div>
               <Link to={`/researcher/questions/${q._id}`} className="btn btn-primary btn-sm">Submit Answer</Link>
             </div>

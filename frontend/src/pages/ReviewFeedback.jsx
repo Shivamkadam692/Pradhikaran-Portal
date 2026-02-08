@@ -36,11 +36,13 @@ export default function ReviewFeedback() {
 
   const handleRequestRevision = async () => {
     if (!selectedAnswer) return;
+    const revisionReason = window.prompt('Please provide a reason for requesting revision:');
+    if (revisionReason === null) return; // User cancelled
     setActionLoading(true);
     try {
-      await answersApi.requestRevision(selectedAnswer._id);
-      setSelectedAnswer((a) => (a ? { ...a, status: 'revision_requested' } : null));
-      setAnswers((list) => list.map((a) => (a._id === selectedAnswer._id ? { ...a, status: 'revision_requested' } : a)));
+      await answersApi.requestRevision(selectedAnswer._id, revisionReason || '');
+      setSelectedAnswer((a) => (a ? { ...a, status: 'revision_requested', revisionReason: revisionReason || '' } : null));
+      setAnswers((list) => list.map((a) => (a._id === selectedAnswer._id ? { ...a, status: 'revision_requested', revisionReason: revisionReason || '' } : a)));
     } finally {
       setActionLoading(false);
     }
@@ -143,6 +145,52 @@ export default function ReviewFeedback() {
                   <p key={i}>{p || <br />}</p>
                 ))}
               </div>
+
+              {selectedAnswer.attachments && selectedAnswer.attachments.length > 0 && (
+                <section className="detail-section" style={{ marginTop: '1rem', marginBottom: '1rem' }}>
+                  <h4>Attached Documents:</h4>
+                  <ul style={{ listStyle: 'none', padding: 0, margin: '0.5rem 0' }}>
+                    {selectedAnswer.attachments.map((file) => {
+                      const formatFileSize = (bytes) => {
+                        if (bytes === 0) return '0 Bytes';
+                        const k = 1024;
+                        const sizes = ['Bytes', 'KB', 'MB'];
+                        const i = Math.floor(Math.log(bytes) / Math.log(k));
+                        return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+                      };
+                      const handleDownload = async () => {
+                        try {
+                          const blob = await answersApi.downloadFile(selectedAnswer._id, file._id);
+                          const url = window.URL.createObjectURL(blob);
+                          const a = document.createElement('a');
+                          a.href = url;
+                          a.download = file.originalName;
+                          document.body.appendChild(a);
+                          a.click();
+                          window.URL.revokeObjectURL(url);
+                          document.body.removeChild(a);
+                        } catch (err) {
+                          alert('Failed to download file');
+                        }
+                      };
+                      return (
+                        <li key={file._id} style={{ marginBottom: '0.5rem', padding: '0.5rem', background: '#f8f9fa', borderRadius: '4px' }}>
+                          <button
+                            type="button"
+                            onClick={handleDownload}
+                            style={{ background: 'none', border: 'none', color: '#0366d6', cursor: 'pointer', textDecoration: 'underline', padding: 0, fontSize: 'inherit' }}
+                          >
+                            📎 {file.originalName}
+                          </button>
+                          <span style={{ color: '#586069', fontSize: '0.9rem', marginLeft: '0.5rem' }}>
+                            ({formatFileSize(file.size)})
+                          </span>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </section>
+              )}
 
               <section className="inline-comment-form">
                 <h4>Add inline comment</h4>

@@ -9,11 +9,39 @@ export const getOne = (answerId) =>
 export const getVersions = (answerId) =>
   client.get(`/answers/${answerId}/versions`).then((r) => r.data);
 
-export const submit = (questionId, data) =>
-  client.post(`/questions/${questionId}/answers`, data).then((r) => r.data);
+export const submit = (questionId, data, files = []) => {
+  const formData = new FormData();
+  formData.append('content', data.content || '');
+  if (data.revisionNote) {
+    formData.append('revisionNote', data.revisionNote);
+  }
+  
+  // Append files
+  files.forEach((file) => {
+    formData.append('attachments', file);
+  });
+  
+  return client.post(`/questions/${questionId}/answers`, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  }).then((r) => r.data);
+};
 
-export const requestRevision = (answerId) =>
-  client.post(`/answers/${answerId}/request-revision`).then((r) => r.data);
+export const downloadFile = (answerId, fileId) => {
+  const token = localStorage.getItem('token');
+  return fetch(`/api/answers/${answerId}/files/${fileId}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  }).then((res) => {
+    if (!res.ok) throw new Error('Download failed');
+    return res.blob();
+  });
+};
+
+export const requestRevision = (answerId, revisionReason = '') =>
+  client.post(`/answers/${answerId}/request-revision`, { revisionReason }).then((r) => r.data);
 
 export const approveAnswer = (answerId) =>
   client.post(`/answers/${answerId}/approve`).then((r) => r.data);

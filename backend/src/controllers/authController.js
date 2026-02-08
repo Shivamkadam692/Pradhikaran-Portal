@@ -10,12 +10,16 @@ const generateToken = (id) =>
 
 exports.register = async (req, res) => {
   try {
-    const { email, password, name, role } = req.body;
+    const { email, password, name, role, department } = req.body;
     const existing = await User.findOne({ email });
     if (existing) {
       return res.status(400).json({ success: false, message: 'Email already registered' });
     }
-    const user = await User.create({ email, password, name, role });
+    // Department is required for new registrations
+    if (!department || !department.trim()) {
+      return res.status(400).json({ success: false, message: 'Department is required' });
+    }
+    const user = await User.create({ email, password, name, role, department: department.trim() });
     const token = generateToken(user._id);
     auditLogger.log({
       userId: user._id,
@@ -28,7 +32,7 @@ exports.register = async (req, res) => {
     res.status(201).json({
       success: true,
       token,
-      user: { id: user._id, email: user.email, name: user.name, role: user.role },
+      user: { id: user._id, email: user.email, name: user.name, role: user.role, department: user.department },
     });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
@@ -57,7 +61,7 @@ exports.login = async (req, res) => {
     res.json({
       success: true,
       token,
-      user: { id: user._id, email: user.email, name: user.name, role: user.role },
+      user: { id: user._id, email: user.email, name: user.name, role: user.role, department: user.department },
     });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
@@ -68,6 +72,6 @@ exports.me = async (req, res) => {
   const u = req.user;
   res.json({
     success: true,
-    user: { id: u._id, _id: u._id, email: u.email, name: u.name, role: u.role },
+    user: { id: u._id, _id: u._id, email: u.email, name: u.name, role: u.role, department: u.department },
   });
 };

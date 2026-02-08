@@ -23,12 +23,28 @@ exports.submit = async (req, res) => {
     let answer = await Answer.findOne({ question: question._id, author: req.user._id });
     const content = req.body.content || '';
     const revisionNote = req.body.revisionNote;
+    
+    // Handle file uploads
+    const attachments = [];
+    if (req.files && req.files.length > 0) {
+      req.files.forEach((file) => {
+        attachments.push({
+          filename: file.filename,
+          originalName: file.originalname,
+          path: file.path,
+          mimeType: file.mimetype,
+          size: file.size,
+        });
+      });
+    }
+    
     if (!answer) {
       answer = await Answer.create({
         question: question._id,
         author: req.user._id,
         content,
         status: ANSWER_STATUS.SUBMITTED,
+        attachments: attachments,
       });
       const version = await AnswerVersion.create({
         answer: answer._id,
@@ -67,6 +83,10 @@ exports.submit = async (req, res) => {
     });
     answer.content = content;
     answer.status = ANSWER_STATUS.SUBMITTED;
+    // Add new attachments to existing ones
+    if (attachments.length > 0) {
+      answer.attachments = [...(answer.attachments || []), ...attachments];
+    }
     await answer.save();
     auditLogger.log({
       userId: req.user._id,
@@ -146,6 +166,7 @@ exports.requestRevision = async (req, res) => {
     if (!req.isAnswerOwner) return res.status(403).json({ success: false, message: 'Only question owner can request revision' });
     if (answer.isLocked) return res.status(400).json({ success: false, message: 'Answer is locked' });
     answer.status = ANSWER_STATUS.REVISION_REQUESTED;
+    answer.revisionReason = req.body.revisionReason || '';
     await answer.save();
     auditLogger.log({
       userId: req.user._id,
@@ -169,6 +190,35 @@ exports.requestRevision = async (req, res) => {
     const io = getIO();
     if (io) io.to(`user-${answer.author}`).emit('revision_requested', { answerId: answer._id });
     res.json({ success: true, data: answer });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+// Download file attachment
+exports.downloadFile = async (req, res) => {
+  try {
+    const answer = req.answer;
+    const fileId = req.params.fileId;
+    const file = answer.attachments?.find((f) => f._id.toString() === fileId);
+    
+    if (!file) {
+      return res.status(404).json({ success: false, message: 'File not found' });
+    }
+    
+    const path = require('path');
+    const fs = require('fs');
+    const filePath = path.join(__dirname, '../../uploads', file.filename);
+    
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).json({ success: false, message: 'File not found on server' });
+    }
+    
+    res.setHeader('Content-Type', file.mimeType);
+    res.setHeader('Content-Disposition', `attachment; filename="${file.originalName}"`);
+    
+    const fileStream = fs.createReadStream(filePath);
+    fileStream.pipe(res);
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }

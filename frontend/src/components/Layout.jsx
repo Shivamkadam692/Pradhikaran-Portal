@@ -57,7 +57,7 @@ export default function Layout({ children }) {
     <div className="layout">
       <header className="layout-header">
         <div className="layout-brand">
-          <Link to={isSenior ? '/senior' : '/researcher'}>Research Collab</Link>
+          <Link to={isSenior ? '/senior' : '/researcher'}>Pradhikaran Portal</Link>
         </div>
         <nav className="layout-nav">
           {isSenior && (

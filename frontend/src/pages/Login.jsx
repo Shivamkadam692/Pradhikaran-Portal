@@ -18,7 +18,7 @@ export default function Login() {
     try {
       await login(email, password);
       const user = JSON.parse(localStorage.getItem('user'));
-      navigate(user.role === 'senior_member' ? '/senior' : '/researcher');
+      navigate(user.role === 'senior_member' ? '/senior' : '/researcher/landing');
     } catch (err) {
       setError(err.response?.data?.message || 'Login failed');
     } finally {
@@ -29,7 +29,7 @@ export default function Login() {
   return (
     <div className="auth-page">
       <div className="auth-card">
-        <h1>Research Collaboration Platform</h1>
+        <h1>Pradhikaran Portal</h1>
         <p className="auth-subtitle">Sign in to your account</p>
         <form onSubmit={handleSubmit} className="auth-form">
           {error && <div className="auth-error">{error}</div>}

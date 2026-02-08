@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import './Auth.css';
 
 export default function Register() {
-  const [form, setForm] = useState({ email: '', password: '', name: '', role: 'researcher' });
+  const [form, setForm] = useState({ email: '', password: '', name: '', role: 'researcher', department: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const { register } = useAuth();
@@ -16,7 +16,7 @@ export default function Register() {
     setLoading(true);
     try {
       await register(form);
-      navigate(form.role === 'senior_member' ? '/senior' : '/researcher');
+      navigate(form.role === 'senior_member' ? '/senior' : '/researcher/landing');
     } catch (err) {
       setError(err.response?.data?.message || 'Registration failed');
     } finally {
@@ -70,6 +70,16 @@ export default function Register() {
               <option value="researcher">Researcher</option>
               <option value="senior_member">Senior Member</option>
             </select>
+          </label>
+          <label>
+            Department
+            <input
+              type="text"
+              value={form.department}
+              onChange={(e) => setForm((f) => ({ ...f, department: e.target.value }))}
+              required
+              placeholder="e.g., Computer Science, Mathematics"
+            />
           </label>
           <button type="submit" className="btn btn-primary" disabled={loading}>
             {loading ? 'Creating...' : 'Register'}

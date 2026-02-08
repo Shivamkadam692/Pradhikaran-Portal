@@ -32,6 +32,22 @@ const answerSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    // Revision reason when revision is requested
+    revisionReason: {
+      type: String,
+      default: '',
+    },
+    // Attached documents/files
+    attachments: [
+      {
+        filename: String,
+        originalName: String,
+        path: String,
+        mimeType: String,
+        size: Number,
+        uploadedAt: { type: Date, default: Date.now },
+      },
+    ],
   },
   { timestamps: true }
 );

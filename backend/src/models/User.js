@@ -31,6 +31,12 @@ const userSchema = new mongoose.Schema(
       enum: Object.values(ROLES),
       required: true,
     },
+    department: {
+      type: String,
+      required: false, // Made optional for backward compatibility
+      trim: true,
+      default: '',
+    },
     isActive: {
       type: Boolean,
       default: true,

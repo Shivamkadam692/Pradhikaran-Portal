@@ -60,7 +60,6 @@ export default function SeniorDashboard() {
               <p className="card-desc">{q.description?.slice(0, 120)}...</p>
               <div className="card-meta">
                 <span>Deadline: {formatDate(q.submissionDeadline)}</span>
-                {Array.isArray(q.tags) && q.tags.length > 0 && <span>Tags: {q.tags.join(', ')}</span>}
               </div>
               <div className="card-actions">
                 <Link to={`/senior/questions/${q._id}`} className="btn btn-ghost btn-sm">View</Link>
