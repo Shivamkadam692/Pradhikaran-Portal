@@ -31,6 +31,9 @@ router.get('/mine', seniorOnly, questionController.listMine);
 // Researcher: open questions (no owner exposed in anonymous mode)
 router.get('/open', requireRole('researcher'), questionController.listOpen);
 
+// Researcher: questions I've answered
+router.get('/answered', requireRole('researcher'), questionController.listAnswered);
+
 // Get one (by id) - param id
 router.get('/:id', questionController.getOne);
 
@@ -52,5 +55,8 @@ router.put(
 
 router.post('/:questionId/publish', seniorOnly, isQuestionOwner, questionController.publish);
 router.post('/:questionId/close', seniorOnly, isQuestionOwner, questionController.closeQuestion);
+
+// Senior: delete question
+router.delete('/:questionId', seniorOnly, isQuestionOwner, questionController.deleteQuestion);
 
 module.exports = router;

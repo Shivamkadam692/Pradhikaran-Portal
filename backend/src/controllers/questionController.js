@@ -35,6 +35,47 @@ exports.create = async (req, res) => {
   }
 };
 
+// Researcher: questions I've answered
+exports.listAnswered = async (req, res) => {
+  try {
+    const Answer = require('../models/Answer');
+    
+    // Find all answers by this user
+    const answers = await Answer.find({ author: req.user._id }).populate('question');
+    
+    // Extract unique questions from answers
+    const answeredQuestionIds = [...new Set(answers.map(a => a.question._id.toString()))];
+    
+    // Get the full question details
+    const questions = await Question.find({ _id: { $in: answeredQuestionIds } })
+      .populate('owner', 'name role department')
+      .sort({ updatedAt: -1 });
+    
+    const data = questions.map((q) => {
+      const obj = q.toObject();
+      
+      // For answered questions, find the latest answer by this user
+      const userAnswer = answers
+        .filter(a => a.question._id.toString() === q._id.toString())
+        .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))[0];
+      
+      if (userAnswer) {
+        obj.myAnswerStatus = userAnswer.status;
+        obj.myLastAnswerDate = userAnswer.updatedAt;
+      }
+      
+      if (q.anonymousMode) {
+        delete obj.owner;
+      }
+      return obj;
+    });
+    
+    res.json({ success: true, data });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
 // Senior: list my questions
 exports.listMine = async (req, res) => {
   try {
@@ -96,6 +137,48 @@ exports.getOne = async (req, res) => {
       delete obj.owner;
     }
     res.json({ success: true, data: obj });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+// Senior: delete question
+exports.deleteQuestion = async (req, res) => {
+  try {
+    const question = req.question;
+    
+    // Check if question has answers - prevent deletion if it does
+    const Answer = require('../models/Answer');
+    const answerCount = await Answer.countDocuments({ question: question._id });
+    
+    if (answerCount > 0) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Cannot delete question that has received answers' 
+      });
+    }
+    
+    // Allow deletion of draft and closed questions only
+    if (question.status !== 'draft' && question.status !== 'closed') {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Cannot delete question in this status' 
+      });
+    }
+    
+    // Delete the question
+    await Question.findByIdAndDelete(question._id);
+    
+    auditLogger.log({
+      userId: req.user._id,
+      action: 'question_delete',
+      resourceType: 'Question',
+      resourceId: question._id,
+      ip: req.ip,
+      userAgent: req.get('User-Agent'),
+    });
+    
+    res.json({ success: true, message: 'Question deleted successfully' });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }

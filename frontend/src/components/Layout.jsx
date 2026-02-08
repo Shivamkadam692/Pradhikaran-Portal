@@ -57,9 +57,12 @@ export default function Layout({ children }) {
     <div className="layout">
       <header className="layout-header">
         <div className="layout-brand">
-          <Link to={isSenior ? '/senior' : '/researcher'}>Pradhikaran Portal</Link>
+          <Link to={isSenior ? '/senior' : '/researcher/landing'}>Pradhikaran Portal</Link>
         </div>
         <nav className="layout-nav">
+          {/* Home button for both roles */}
+          <Link to={isSenior ? '/senior' : '/researcher/landing'} className={location.pathname === (isSenior ? '/senior' : '/researcher/landing') ? 'active' : ''}>Home</Link>
+          
           {isSenior && (
             <>
               <Link to="/senior" className={location.pathname === '/senior' ? 'active' : ''}>Dashboard</Link>
@@ -68,50 +71,10 @@ export default function Layout({ children }) {
             </>
           )}
           {!isSenior && (
-            <Link to="/researcher" className={location.pathname === '/researcher' ? 'active' : ''}>Dashboard</Link>
+            <Link to="/researcher" className={location.pathname === '/researcher' ? 'active' : ''}>My Questions</Link>
           )}
         </nav>
         <div className="layout-actions">
-          <div className="notif-wrap">
-            <button
-              type="button"
-              className="icon-btn"
-              onClick={() => setShowNotifs(!showNotifs)}
-              aria-label="Notifications"
-            >
-              🔔
-              {unreadCount > 0 && <span className="badge">{unreadCount}</span>}
-            </button>
-            {showNotifs && (
-              <div className="notif-dropdown">
-                {notifications.length === 0 ? (
-                  <p className="muted">No notifications</p>
-                ) : (
-                  notifications.slice(0, 10).map((n) => {
-                    const path = n.link || '';
-                    const match = path.match(/\/questions\/([a-f0-9]+)/);
-                    const qId = match?.[1];
-                    const to = path.startsWith('/questions/')
-                      ? (user?.role === 'senior_member' ? `/senior${path}` : (qId ? `/researcher/questions/${qId}` : `/researcher${path}`))
-                      : (path || '#');
-                    return (
-                    <Link
-                      key={n._id}
-                      to={to}
-                      className="notif-item"
-                      onClick={() => {
-                        notificationsApi.markRead(n._id);
-                        setShowNotifs(false);
-                      }}
-                    >
-                      <strong>{n.title}</strong>
-                      {!n.read && <span className="unread-dot" />}
-                    </Link>
-                  ); })
-                )}
-              </div>
-            )}
-          </div>
           <span className="user-name">{user?.name}</span>
           <button type="button" className="btn btn-ghost" onClick={handleLogout}>Logout</button>
         </div>

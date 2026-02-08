@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import * as questionsApi from '../api/questions';
 import './Dashboard.css';
+import './FormPages.css';
 
 const STATUS_LABELS = { draft: 'Draft', open: 'Open', closed: 'Closed', completed: 'Completed' };
 
@@ -9,6 +10,7 @@ export default function SeniorDashboard() {
   const [questions, setQuestions] = useState([]);
   const [filter, setFilter] = useState('');
   const [loading, setLoading] = useState(true);
+  const [deletingQuestion, setDeletingQuestion] = useState(null);
 
   useEffect(() => {
     questionsApi
@@ -24,6 +26,26 @@ export default function SeniorDashboard() {
       return new Date(d).toLocaleDateString(undefined, { dateStyle: 'short', timeStyle: 'short' });
     } catch {
       return 'Invalid Date';
+    }
+  };
+
+  const handleDelete = async (questionId) => {
+    if (!window.confirm('Are you sure you want to delete this question? This action cannot be undone.')) {
+      return;
+    }
+    
+    setDeletingQuestion(questionId);
+    try {
+      await questionsApi.deleteQuestion(questionId);
+      // Refresh the list
+      questionsApi
+        .listMine({ status: filter || undefined })
+        .then((res) => setQuestions(Array.isArray(res?.data) ? res.data : []))
+        .catch(() => setQuestions([]))
+        .finally(() => setDeletingQuestion(null));
+    } catch (error) {
+      alert('Error deleting question: ' + error.response?.data?.message || error.message);
+      setDeletingQuestion(null);
     }
   };
 
@@ -66,6 +88,15 @@ export default function SeniorDashboard() {
                 {q.status === 'open' || q.status === 'closed' ? (
                   <Link to={`/senior/questions/${q._id}/review`} className="btn btn-primary btn-sm">Review</Link>
                 ) : null}
+                {(q.status === 'draft' || q.status === 'closed') && (
+                  <button 
+                    className="btn btn-danger btn-sm"
+                    onClick={() => handleDelete(q._id)}
+                    disabled={deletingQuestion === q._id}
+                  >
+                    {deletingQuestion === q._id ? 'Deleting...' : 'Delete'}
+                  </button>
+                )}
               </div>
             </div>
           ))}

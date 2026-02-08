@@ -6,6 +6,9 @@ export const listMine = (params) =>
 export const listOpen = () =>
   client.get('/questions/open').then((r) => r.data);
 
+export const listAnswered = () =>
+  client.get('/questions/answered').then((r) => r.data);
+
 export const getOne = (id) =>
   client.get(`/questions/${id}`).then((r) => r.data);
 
@@ -20,3 +23,6 @@ export const publish = (questionId) =>
 
 export const close = (questionId) =>
   client.post(`/questions/${questionId}/close`).then((r) => r.data);
+
+export const deleteQuestion = (questionId) =>
+  client.delete(`/questions/${questionId}`).then((r) => r.data);
