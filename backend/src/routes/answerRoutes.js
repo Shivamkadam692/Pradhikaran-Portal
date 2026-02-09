@@ -37,6 +37,9 @@ router.get('/answers/:answerId', canAccessAnswer, answerController.getOne);
 // Version history
 router.get('/answers/:answerId/versions', canAccessAnswer, answerController.getVersions);
 
+// Senior: delete answer
+router.delete('/answers/:answerId', seniorOnly, canAccessAnswer, answerController.deleteAnswer);
+
 // Senior: request revision
 router.post(
   '/answers/:answerId/request-revision',

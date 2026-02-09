@@ -48,3 +48,6 @@ export const approveAnswer = (answerId) =>
 
 export const rejectAnswer = (answerId, reason) =>
   client.post(`/answers/${answerId}/reject`, { reason }).then((r) => r.data);
+
+export const deleteAnswer = (answerId) =>
+  client.delete(`/answers/${answerId}`).then((r) => r.data);

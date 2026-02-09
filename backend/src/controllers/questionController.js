@@ -150,7 +150,7 @@ exports.deleteQuestion = async (req, res) => {
     // Check if question has answers - prevent deletion if it does
     const Answer = require('../models/Answer');
     const answerCount = await Answer.countDocuments({ question: question._id });
-    
+      
     if (answerCount > 0) {
       return res.status(400).json({ 
         success: false, 
@@ -159,7 +159,7 @@ exports.deleteQuestion = async (req, res) => {
     }
     
     // Allow deletion of draft and closed questions only
-    if (question.status !== 'draft' && question.status !== 'closed') {
+    if (question.status !== QUESTION_STATUS.DRAFT && question.status !== QUESTION_STATUS.CLOSED) {
       return res.status(400).json({ 
         success: false, 
         message: 'Cannot delete question in this status' 

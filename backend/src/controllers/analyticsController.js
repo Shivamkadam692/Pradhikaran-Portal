@@ -52,6 +52,59 @@ exports.dashboard = async (req, res) => {
       { $limit: 10 },
     ]);
 
+    // Get recent activity (last 30 days)
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    
+    const recentQuestions = await Question.countDocuments({
+      owner: userId,
+      createdAt: { $gte: thirtyDaysAgo }
+    });
+    
+    const recentAnswers = await Answer.countDocuments({
+      question: { $in: questionIds },
+      createdAt: { $gte: thirtyDaysAgo }
+    });
+    
+    // Get answer status distribution
+    const answersByStatus = await Answer.aggregate([
+      { $match: { question: { $in: questionIds } } },
+      { $group: { _id: '$status', count: { $sum: 1 } } },
+    ]);
+    const answerStatusMap = Object.fromEntries(answersByStatus.map((s) => [s._id, s.count]));
+    
+    // Get top performing questions (most answers)
+    const topQuestions = await Question.aggregate([
+      { $match: { owner: userId } },
+      {
+        $lookup: {
+          from: 'answers',
+          localField: '_id',
+          foreignField: 'question',
+          as: 'answers'
+        }
+      },
+      { $addFields: { answerCount: { $size: '$answers' } } },
+      { $sort: { answerCount: -1 } },
+      { $limit: 5 },
+      { $project: { title: 1, answerCount: 1, status: 1 } }
+    ]);
+    
+    // Get average time to completion
+    const completedQuestions = await Question.find({
+      owner: userId,
+      status: QUESTION_STATUS.COMPLETED
+    }).select('createdAt updatedAt');
+    
+    let avgCompletionTime = 0;
+    if (completedQuestions.length > 0) {
+      const totalCompletionTime = completedQuestions.reduce((sum, q) => {
+        const diff = new Date(q.updatedAt) - new Date(q.createdAt);
+        return sum + diff;
+      }, 0);
+      avgCompletionTime = Math.round(totalCompletionTime / completedQuestions.length / (1000 * 60 * 60 * 24)); // days
+    }
+
     res.json({
       success: true,
       data: {
@@ -64,6 +117,14 @@ exports.dashboard = async (req, res) => {
         completedCount,
         commentsCount,
         domainActivity,
+        recentActivity: {
+          questions: recentQuestions,
+          answers: recentAnswers,
+          period: 'last 30 days'
+        },
+        answerStatusDistribution: answerStatusMap,
+        topPerformingQuestions: topQuestions,
+        averageCompletionTime: avgCompletionTime
       },
     });
   } catch (err) {

@@ -13,6 +13,7 @@ export default function QuestionDetail() {
   const [compilation, setCompilation] = useState('');
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     questionsApi.getOne(id).then((res) => setQuestion(res.data)).catch(() => setQuestion(null)).finally(() => setLoading(false));
@@ -64,6 +65,32 @@ export default function QuestionDetail() {
     }
   };
 
+  const handleDeleteQuestion = async () => {
+    // Only allow deletion of draft or closed questions
+    if (question.status !== 'draft' && question.status !== 'closed') {
+      alert('Only draft or closed questions can be deleted');
+      return;
+    }
+
+    const confirmed = window.confirm(
+      `Are you sure you want to delete the question "${question.title}"?\n\n` +
+      `This action cannot be undone and will permanently remove the question.`
+    );
+
+    if (!confirmed) return;
+
+    setDeleting(true);
+    try {
+      await questionsApi.deleteQuestion(id);
+      // Navigate back to dashboard
+      navigate('/senior');
+    } catch (error) {
+      alert('Failed to delete question: ' + error.message);
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   if (loading || !question) return <div className="muted">Loading...</div>;
 
   const formatDate = (d) => {
@@ -97,17 +124,34 @@ export default function QuestionDetail() {
             Publish (open for submissions)
           </button>
           <Link to={`/senior/questions/${id}/edit`} className="btn btn-ghost">Edit</Link>
+          <button 
+            onClick={handleDeleteQuestion} 
+            className="btn btn-danger" 
+            disabled={deleting || actionLoading}
+          >
+            {deleting ? 'Deleting...' : 'Delete Question'}
+          </button>
         </div>
       )}
 
-      {(question.status === 'open' || question.status === 'closed') && (
+      {question.status === 'closed' && (
+        <div className="detail-actions">
+          <button 
+            onClick={handleDeleteQuestion} 
+            className="btn btn-danger" 
+            disabled={deleting || actionLoading}
+          >
+            {deleting ? 'Deleting...' : 'Delete Question'}
+          </button>
+        </div>
+      )}
+
+      {question.status === 'open' && (
         <div className="detail-actions">
           <Link to={`/senior/questions/${id}/review`} className="btn btn-primary">Review answers</Link>
-          {question.status === 'open' && (
-            <button onClick={handleClose} className="btn btn-ghost" disabled={actionLoading}>
-              Close question
-            </button>
-          )}
+          <button onClick={handleClose} className="btn btn-ghost" disabled={actionLoading}>
+            Close question
+          </button>
         </div>
       )}
 

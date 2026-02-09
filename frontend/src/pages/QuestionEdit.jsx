@@ -15,6 +15,7 @@ export default function QuestionEdit() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     questionsApi.getOne(id).then((res) => {
@@ -47,6 +48,26 @@ export default function QuestionEdit() {
     }
   };
 
+  const handleDeleteQuestion = async () => {
+    const confirmed = window.confirm(
+      'Are you sure you want to delete this draft question?\n\n' +
+      'This action cannot be undone.'
+    );
+
+    if (!confirmed) return;
+
+    setDeleting(true);
+    try {
+      await questionsApi.deleteQuestion(id);
+      // Navigate back to dashboard
+      navigate('/senior');
+    } catch (error) {
+      alert('Failed to delete question: ' + error.message);
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   if (loading) return <div className="muted">Loading...</div>;
 
   return (
@@ -59,7 +80,17 @@ export default function QuestionEdit() {
         <label>Submission deadline * <input type="datetime-local" value={form.submissionDeadline} onChange={(e) => setForm((f) => ({ ...f, submissionDeadline: e.target.value }))} required /></label>
         <label className="checkbox-label"><input type="checkbox" checked={form.anonymousMode} onChange={(e) => setForm((f) => ({ ...f, anonymousMode: e.target.checked }))} /> Anonymous mode</label>
         <div className="form-actions">
-          <button type="submit" className="btn btn-primary" disabled={saving}>{saving ? 'Saving...' : 'Save'}</button>
+          <button type="submit" className="btn btn-primary" disabled={saving || deleting}>
+            {saving ? 'Saving...' : 'Save'}
+          </button>
+          <button 
+            type="button" 
+            onClick={handleDeleteQuestion} 
+            className="btn btn-danger" 
+            disabled={deleting || saving}
+          >
+            {deleting ? 'Deleting...' : 'Delete Draft'}
+          </button>
           <Link to={`/senior/questions/${id}`} className="btn btn-ghost">Cancel</Link>
         </div>
       </form>

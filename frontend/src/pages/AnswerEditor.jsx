@@ -20,6 +20,7 @@ export default function AnswerEditor() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     questionsApi.getOne(questionId).then((res) => setQuestion(res.data)).catch(() => setQuestion(null)).finally(() => setLoading(false));
@@ -107,6 +108,34 @@ export default function AnswerEditor() {
       setError(err.response?.data?.message || 'Submit failed');
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleDeleteAnswer = async () => {
+    if (!myAnswer) return;
+    
+    // Only allow deletion of draft answers
+    if (myAnswer.status !== 'draft') {
+      alert('Only draft answers can be deleted');
+      return;
+    }
+    
+    const confirmed = window.confirm(
+      'Are you sure you want to delete your draft answer?\n\n' +
+      'This action cannot be undone.'
+    );
+    
+    if (!confirmed) return;
+    
+    setDeleting(true);
+    try {
+      await answersApi.deleteAnswer(myAnswer._id);
+      // Navigate back to the question
+      navigate(`/researcher/questions/${questionId}`);
+    } catch (error) {
+      alert('Failed to delete answer: ' + error.message);
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -263,9 +292,21 @@ export default function AnswerEditor() {
           </div>
         )}
         {isOpen && canEdit && (
-          <button type="submit" className="btn btn-primary" disabled={submitting}>
-            {myAnswer ? 'Submit revision' : 'Submit answer'}
-          </button>
+          <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1rem' }}>
+            <button type="submit" className="btn btn-primary" disabled={submitting || deleting}>
+              {submitting ? 'Submitting...' : (myAnswer ? 'Submit revision' : 'Submit answer')}
+            </button>
+            {myAnswer && myAnswer.status === 'draft' && (
+              <button 
+                type="button" 
+                className="btn btn-danger" 
+                onClick={handleDeleteAnswer}
+                disabled={deleting || submitting}
+              >
+                {deleting ? 'Deleting...' : 'Delete Draft'}
+              </button>
+            )}
+          </div>
         )}
       </form>
 

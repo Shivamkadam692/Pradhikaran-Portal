@@ -159,6 +159,54 @@ exports.getVersions = async (req, res) => {
   }
 };
 
+// Senior: delete answer
+exports.deleteAnswer = async (req, res) => {
+  try {
+    const answer = req.answer;
+    
+    // Check if answer is locked - prevent deletion if it is
+    if (answer.isLocked) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Cannot delete locked answer' 
+      });
+    }
+    
+    // Check if answer is approved - prevent deletion if it is
+    const { ANSWER_STATUS } = require('../constants/roles');
+    if (answer.status === ANSWER_STATUS.APPROVED) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Cannot delete approved answer' 
+      });
+    }
+    
+    // Delete associated answer versions
+    await AnswerVersion.deleteMany({ answer: answer._id });
+    
+    // Delete associated inline comments
+    const InlineComment = require('../models/InlineComment');
+    await InlineComment.deleteMany({ answer: answer._id });
+    
+    // Delete the answer
+    await Answer.findByIdAndDelete(answer._id);
+    
+    auditLogger.log({
+      userId: req.user._id,
+      action: 'answer_delete',
+      resourceType: 'Answer',
+      resourceId: answer._id,
+      metadata: { questionId: answer.question },
+      ip: req.ip,
+      userAgent: req.get('User-Agent'),
+    });
+    
+    res.json({ success: true, message: 'Answer deleted successfully' });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
 // Senior: request revision (set status to revision_requested)
 exports.requestRevision = async (req, res) => {
   try {
