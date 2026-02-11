@@ -9,13 +9,15 @@ import PradhikaranDashboard from './pages/PradhikaranDashboard';
 import AdminPanel from './pages/AdminPanel';
 import SeniorDashboard from './pages/SeniorDashboard';
 import ResearcherDashboard from './pages/ResearcherDashboard';
+import Analytics from './pages/Analytics';
 import ResearcherLanding from './pages/ResearcherLanding';
+import DepartmentManagementDashboard from './pages/DepartmentManagementDashboard';
+import QAManagementDashboard from './pages/QAManagementDashboard';
 import QuestionCreate from './pages/QuestionCreate';
 import QuestionDetail from './pages/QuestionDetail';
 import AnswerEditor from './pages/AnswerEditor';
 import ReviewFeedback from './pages/ReviewFeedback';
 import QuestionEdit from './pages/QuestionEdit';
-import Analytics from './pages/Analytics';
 
 function ProtectedRoute({ children, allowedRoles }) {
   const { user, loading } = useAuth();
@@ -81,6 +83,22 @@ export default function App() {
         element={
           <ProtectedRoute allowedRoles={['pradhikaran_office']}>
             <Layout><ReviewFeedback /></Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/pradhikaran/departments"
+        element={
+          <ProtectedRoute allowedRoles={['pradhikaran_office']}>
+            <Layout><DepartmentManagementDashboard /></Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/pradhikaran/questions"
+        element={
+          <ProtectedRoute allowedRoles={['pradhikaran_office']}>
+            <Layout><QAManagementDashboard /></Layout>
           </ProtectedRoute>
         }
       />

@@ -80,8 +80,8 @@ exports.approveRegistration = async (req, res) => {
       resourceId: user._id,
       metadata: { 
         approvedUserId: user._id,
-        department: user.department,
-        institution: user.institution
+        department: user.department || 'N/A',
+        institution: user.institution || 'N/A'
       },
       ip: req.ip,
       userAgent: req.get('User-Agent'),
@@ -89,6 +89,7 @@ exports.approveRegistration = async (req, res) => {
     
     res.json({ success: true, message: 'Registration approved successfully', data: user });
   } catch (err) {
+    console.error('Error in approveRegistration:', err);
     res.status(500).json({ success: false, message: err.message });
   }
 };
@@ -147,8 +148,8 @@ exports.rejectRegistration = async (req, res) => {
       metadata: { 
         rejectedUserId: user._id,
         reason: reason,
-        department: user.department,
-        institution: user.institution
+        department: user.department || 'N/A',
+        institution: user.institution || 'N/A'
       },
       ip: req.ip,
       userAgent: req.get('User-Agent'),
@@ -156,6 +157,7 @@ exports.rejectRegistration = async (req, res) => {
     
     res.json({ success: true, message: 'Registration rejected successfully' });
   } catch (err) {
+    console.error('Error in rejectRegistration:', err);
     res.status(500).json({ success: false, message: err.message });
   }
 };

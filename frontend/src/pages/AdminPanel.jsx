@@ -8,6 +8,7 @@ import './FormPages.css';
 
 export default function AdminPanel() {
   const [adminUsers, setAdminUsers] = useState([]);
+  const [pendingRegistrations, setPendingRegistrations] = useState([]);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState({});
@@ -19,18 +20,28 @@ export default function AdminPanel() {
   });
 
   useEffect(() => {
-    loadAdminUsers();
+    loadAdminData();
   }, []);
 
-  const loadAdminUsers = async () => {
+  const loadAdminData = async () => {
     try {
       setLoading(true);
+      // Load admin users
       // This would require a special admin endpoint to get all Pradhikaran Office users
       // For now, we'll mock this functionality
       console.log('Loading admin users - this needs backend implementation');
       setAdminUsers([]);
+      
+      // Load pending registrations
+      try {
+        const pendingRes = await usersApi.getPendingRegistrations();
+        setPendingRegistrations(pendingRes.data || []);
+      } catch (error) {
+        console.error('Failed to load pending registrations:', error);
+        setPendingRegistrations([]);
+      }
     } catch (error) {
-      console.error('Failed to load admin users:', error);
+      console.error('Failed to load admin data:', error);
     } finally {
       setLoading(false);
     }
@@ -57,7 +68,7 @@ export default function AdminPanel() {
       alert('Admin account created successfully!');
       setShowCreateForm(false);
       setForm({ email: '', password: '', name: '', department: 'Pradhikaran Office' });
-      loadAdminUsers();
+      loadAdminData();
     } catch (error) {
       alert('Failed to create admin account: ' + error.message);
     } finally {
@@ -83,6 +94,75 @@ export default function AdminPanel() {
     }
   };
 
+  const handleApprove = async (userId) => {
+    setActionLoading(prev => ({ ...prev, [userId]: true }));
+    try {
+      await usersApi.approveRegistration(userId);
+      // Refresh data
+      loadAdminData();
+      alert('Registration approved successfully!');
+    } catch (error) {
+      alert('Failed to approve registration: ' + error.message);
+    } finally {
+      setActionLoading(prev => ({ ...prev, [userId]: false }));
+    }
+  };
+
+  const handleReject = async (userId) => {
+    const reason = window.prompt('Please provide a reason for rejection (optional):');
+    if (reason === null) return; // User cancelled
+    
+    setActionLoading(prev => ({ ...prev, [userId]: true }));
+    try {
+      await usersApi.rejectRegistration(userId, reason || undefined);
+      // Refresh data
+      loadAdminData();
+      alert('Registration rejected successfully!');
+    } catch (error) {
+      alert('Failed to reject registration: ' + error.message);
+    } finally {
+      setActionLoading(prev => ({ ...prev, [userId]: false }));
+    }
+  };
+
+  const formatDate = (date) => {
+    if (!date) return 'N/A';
+    try {
+      const d = new Date(date);
+      return d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    } catch {
+      // Fallback to simple formatting
+      return new Date(date).toString();
+    }
+  };
+
+  const getStatusBadge = (status) => {
+    const statusConfig = {
+      'pending': { label: 'Pending', color: '#fd7e14', bg: '#fff3cd' },
+      'approved': { label: 'Approved', color: '#198754', bg: '#d1e7dd' },
+      'rejected': { label: 'Rejected', color: '#dc3545', bg: '#f8d7da' }
+    };
+    
+    const config = statusConfig[status] || statusConfig.pending;
+    
+    return (
+      <span 
+        className="status-badge"
+        style={{
+          backgroundColor: config.bg,
+          color: config.color,
+          border: `1px solid ${config.color}`,
+          padding: '0.25rem 0.5rem',
+          borderRadius: '12px',
+          fontSize: '0.8rem',
+          fontWeight: '500'
+        }}
+      >
+        {config.label}
+      </span>
+    );
+  };
+
   return (
     <div className="dashboard">
       <div className="dashboard-header">
@@ -98,6 +178,53 @@ export default function AdminPanel() {
       </div>
 
       <div className="admin-sections">
+        {/* Pending Registrations Section */}
+        <div className="admin-card">
+          <h2>Pending Department Registrations</h2>
+          <p>Review and approve department registration requests.</p>
+          
+          {loading ? (
+            <div className="muted">Loading pending registrations...</div>
+          ) : pendingRegistrations.length === 0 ? (
+            <div className="empty-state">
+              <p>No pending registrations at this time.</p>
+            </div>
+          ) : (
+            <div className="card-list">
+              {pendingRegistrations.map((user) => (
+                <div key={user._id} className="card">
+                  <div className="card-head">
+                    <h3>{user.name}</h3>
+                    {getStatusBadge(user.registrationStatus)}
+                  </div>
+                  <div className="card-details">
+                    <p><strong>Email:</strong> {user.email}</p>
+                    <p><strong>Department:</strong> {user.department || 'Not specified'}</p>
+                    <p><strong>Institution:</strong> {user.institution || 'Not specified'}</p>
+                    <p><strong>Registered:</strong> {formatDate(user.createdAt)}</p>
+                  </div>
+                  <div className="card-actions">
+                    <button
+                      className="btn btn-success"
+                      onClick={() => handleApprove(user._id)}
+                      disabled={actionLoading[user._id]}
+                    >
+                      {actionLoading[user._id] ? 'Approving...' : 'Approve'}
+                    </button>
+                    <button
+                      className="btn btn-danger"
+                      onClick={() => handleReject(user._id)}
+                      disabled={actionLoading[user._id]}
+                    >
+                      {actionLoading[user._id] ? 'Rejecting...' : 'Reject'}
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
         <div className="admin-card">
           <h2>Pradhikaran Office Accounts</h2>
           <p>Manage administrative accounts with full system access.</p>
@@ -173,7 +300,7 @@ export default function AdminPanel() {
             </div>
             <div className="info-item">
               <strong>Pending Registrations:</strong> 
-              <span>View in main dashboard</span>
+              <span>{pendingRegistrations.length}</span>
             </div>
             <div className="info-item">
               <strong>System Status:</strong> 

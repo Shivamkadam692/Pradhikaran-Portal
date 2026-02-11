@@ -30,7 +30,7 @@ export default function AnswerEditor() {
     if (!question) return;
     answersApi.listByQuestion(questionId).then((res) => {
       const list = res.data || [];
-      // For researchers, API returns only their answers; senior sees all
+      // For departments, API returns only their answers; pradhikaran_office sees all
       const mine = list.length > 0 ? list[0] : null;
       setMyAnswer(mine);
       if (mine) {
@@ -131,7 +131,7 @@ export default function AnswerEditor() {
     try {
       await answersApi.deleteAnswer(myAnswer._id);
       // Navigate back to the question
-      navigate(`/researcher/questions/${questionId}`);
+      navigate(`/departments/questions/${questionId}`);
     } catch (error) {
       alert('Failed to delete answer: ' + error.message);
     } finally {
@@ -157,7 +157,7 @@ export default function AnswerEditor() {
   return (
     <div className="form-page">
       <div className="detail-header">
-        <Link to="/researcher">← Back to questions</Link>
+        <Link to="/departments">← Back to questions</Link>
         <h1>{question.title}</h1>
       </div>
       {question.owner && (

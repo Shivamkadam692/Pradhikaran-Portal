@@ -23,6 +23,8 @@ const notificationSchema = new mongoose.Schema(
         'question_closed',
         'question_completed',
         'inline_comment',
+        'registration_approved',
+        'registration_rejected'
       ],
     },
     title: { type: String, required: true },

@@ -55,7 +55,7 @@ export default function ResearcherDashboard() {
         {qs.map((q) => (
           <div key={q._id} className="card">
             <div className="card-head">
-              <Link to={`/researcher/questions/${q._id}`} className="card-title">{q.title}</Link>
+              <Link to={`/departments/questions/${q._id}`} className="card-title">{q.title}</Link>
             </div>
             <p className="card-desc">{q.description?.slice(0, 160)}...</p>
             <div className="card-meta">
@@ -69,9 +69,9 @@ export default function ResearcherDashboard() {
               )}
             </div>
             {activeTab === 'open' ? (
-              <Link to={`/researcher/questions/${q._id}`} className="btn btn-primary btn-sm">Submit Answer</Link>
+              <Link to={`/departments/questions/${q._id}`} className="btn btn-primary btn-sm">Submit Answer</Link>
             ) : (
-              <Link to={`/researcher/questions/${q._id}`} className="btn btn-primary btn-sm">View Answer</Link>
+              <Link to={`/departments/questions/${q._id}`} className="btn btn-primary btn-sm">View Answer</Link>
             )}
           </div>
         ))}

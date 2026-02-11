@@ -19,7 +19,7 @@ export default function ResearcherLanding() {
           <p style={{ fontSize: '1.1rem', marginBottom: '1.5rem', color: '#666' }}>
             Browse open questions from your department and submit your answers.
           </p>
-          <Link to="/researcher" className="btn btn-primary" style={{ fontSize: '1.1rem', padding: '0.75rem 2rem' }}>
+          <Link to="/departments" className="btn btn-primary" style={{ fontSize: '1.1rem', padding: '0.75rem 2rem' }}>
             View Open Questions
           </Link>
         </div>

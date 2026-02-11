@@ -2,6 +2,7 @@
  * Question controller - CRUD, publish, status, list for researchers (open only).
  */
 const Question = require('../models/Question');
+const Answer = require('../models/Answer');
 const { QUESTION_STATUS } = require('../constants/roles');
 const auditLogger = require('../utils/auditLogger');
 
@@ -71,6 +72,30 @@ exports.listAnswered = async (req, res) => {
     });
     
     res.json({ success: true, data });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+// Pradhikaran Office: list all questions (for management dashboard)
+exports.listAll = async (req, res) => {
+  try {
+    const questions = await Question.find()
+      .populate('owner', 'name department')
+      .sort({ createdAt: -1 });
+    
+    // Add answer count to each question
+    const questionsWithCounts = await Promise.all(
+      questions.map(async (question) => {
+        const answerCount = await Answer.countDocuments({ question: question._id });
+        return {
+          ...question.toObject(),
+          answerCount
+        };
+      })
+    );
+    
+    res.json({ success: true, data: questionsWithCounts });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }
@@ -147,24 +172,9 @@ exports.deleteQuestion = async (req, res) => {
   try {
     const question = req.question;
     
-    // Check if question has answers - prevent deletion if it does
+    // Delete all associated answers first
     const Answer = require('../models/Answer');
-    const answerCount = await Answer.countDocuments({ question: question._id });
-      
-    if (answerCount > 0) {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Cannot delete question that has received answers' 
-      });
-    }
-    
-    // Allow deletion of draft and closed questions only
-    if (question.status !== QUESTION_STATUS.DRAFT && question.status !== QUESTION_STATUS.CLOSED) {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'Cannot delete question in this status' 
-      });
-    }
+    await Answer.deleteMany({ question: question._id });
     
     // Delete the question
     await Question.findByIdAndDelete(question._id);

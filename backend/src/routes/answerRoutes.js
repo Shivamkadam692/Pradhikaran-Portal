@@ -28,6 +28,9 @@ router.post(
 // File download endpoint
 router.get('/answers/:answerId/files/:fileId', canAccessAnswer, answerController.downloadFile);
 
+// Pradhikaran Office: all answers (for management dashboard)
+router.get('/answers/all', pradhikaranOfficeOnly, answerController.listAll);
+
 // List answers for a question (senior: all; researcher: own only)
 router.get('/questions/:questionId/answers', answerController.listByQuestion);
 

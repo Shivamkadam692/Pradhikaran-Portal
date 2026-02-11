@@ -79,7 +79,7 @@ export default function QuestionCreate() {
             checked={form.anonymousMode}
             onChange={(e) => setForm((f) => ({ ...f, anonymousMode: e.target.checked }))}
           />
-          Anonymous mode (researchers cannot see your identity)
+          Anonymous mode (departments cannot see your identity)
         </label>
         <div className="form-actions">
           <button type="submit" className="btn btn-primary" disabled={loading}>

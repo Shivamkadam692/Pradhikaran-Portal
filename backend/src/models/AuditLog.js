@@ -26,6 +26,9 @@ const auditLogSchema = new mongoose.Schema(
         'comment_resolve',
         'compilation_save',
         'compilation_approve',
+        'user_status_toggle',
+        'registration_approve',
+        'registration_reject'
       ],
     },
     resourceType: {

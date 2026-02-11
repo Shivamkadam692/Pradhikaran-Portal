@@ -9,6 +9,20 @@ const { QUESTION_STATUS, ANSWER_STATUS } = require('../constants/roles');
 const auditLogger = require('../utils/auditLogger');
 const { getIO } = require('../socket');
 
+// Pradhikaran Office: list all answers (for management dashboard)
+exports.listAll = async (req, res) => {
+  try {
+    const answers = await Answer.find()
+      .populate('author', 'name department')
+      .populate('question', 'title')
+      .sort({ createdAt: -1 });
+    
+    res.json({ success: true, data: answers });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
 // Researcher: submit or create answer for an open question
 exports.submit = async (req, res) => {
   try {

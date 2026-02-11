@@ -25,6 +25,9 @@ router.post(
   questionController.create
 );
 
+// Pradhikaran Office: all questions (for management dashboard)
+router.get('/all', pradhikaranOfficeOnly, questionController.listAll);
+
 // Pradhikaran Office: my questions
 router.get('/mine', pradhikaranOfficeOnly, questionController.listMine);
 

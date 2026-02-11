@@ -1,5 +1,8 @@
 import client from './client';
 
+export const listAll = (params) =>
+  client.get('/questions/all', { params }).then((r) => r.data);
+
 export const listMine = (params) =>
   client.get('/questions/mine', { params }).then((r) => r.data);
 
