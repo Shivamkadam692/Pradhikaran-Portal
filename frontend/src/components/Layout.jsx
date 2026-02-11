@@ -47,31 +47,38 @@ export default function Layout({ children }) {
 
   const handleLogout = () => {
     logout();
-    navigate('/login');
+    navigate('/pradhikaran/login');
   };
 
   const unreadCount = notifications.filter((n) => !n.read).length;
-  const isSenior = user?.role === 'senior_member';
+  const isPradhikaranOffice = user?.role === 'pradhikaran_office';
+  const isDepartment = user?.role === 'departments';
 
   return (
     <div className="layout">
       <header className="layout-header">
         <div className="layout-brand">
-          <Link to={isSenior ? '/senior' : '/researcher/landing'}>Pradhikaran Portal</Link>
+          <Link to={isPradhikaranOffice ? '/pradhikaran/dashboard' : '/departments/landing'}>Pradhikaran Portal</Link>
         </div>
         <nav className="layout-nav">
           {/* Home button for both roles */}
-          <Link to={isSenior ? '/senior' : '/researcher/landing'} className={location.pathname === (isSenior ? '/senior' : '/researcher/landing') ? 'active' : ''}>Home</Link>
+          <Link 
+            to={isPradhikaranOffice ? '/pradhikaran/dashboard' : '/departments/landing'} 
+            className={location.pathname === (isPradhikaranOffice ? '/pradhikaran/dashboard' : '/departments/landing') ? 'active' : ''}
+          >
+            Home
+          </Link>
           
-          {isSenior && (
+          {isPradhikaranOffice && (
             <>
-              <Link to="/senior" className={location.pathname === '/senior' ? 'active' : ''}>Dashboard</Link>
-              <Link to="/senior/questions/new">New Question</Link>
-              <Link to="/senior/analytics" className={location.pathname === '/senior/analytics' ? 'active' : ''}>Analytics</Link>
+              <Link to="/pradhikaran/dashboard" className={location.pathname === '/pradhikaran/dashboard' ? 'active' : ''}>Dashboard</Link>
+              <Link to="/pradhikaran/questions/new">New Question</Link>
+              <Link to="/pradhikaran/analytics" className={location.pathname === '/pradhikaran/analytics' ? 'active' : ''}>Analytics</Link>
+              <Link to="/pradhikaran/admin" className={location.pathname === '/pradhikaran/admin' ? 'active' : ''}>Admin</Link>
             </>
           )}
-          {!isSenior && (
-            <Link to="/researcher" className={location.pathname === '/researcher' ? 'active' : ''}>My Questions</Link>
+          {isDepartment && (
+            <Link to="/departments" className={location.pathname === '/departments' ? 'active' : ''}>My Questions</Link>
           )}
         </nav>
         <div className="layout-actions">

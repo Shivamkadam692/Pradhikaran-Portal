@@ -3,7 +3,7 @@ const { body } = require('express-validator');
 const answerController = require('../controllers/answerController');
 const compilationController = require('../controllers/compilationController');
 const { protect } = require('../middleware/auth');
-const { seniorOnly, requireRole } = require('../middleware/rbac');
+const { pradhikaranOfficeOnly, requireRole } = require('../middleware/rbac');
 const { isQuestionOwner, canAccessAnswer } = require('../middleware/ownership');
 const validate = require('../middleware/validate');
 const upload = require('../middleware/upload');
@@ -12,10 +12,10 @@ const router = express.Router();
 
 router.use(protect);
 
-// Researcher: submit/revise answer for a question (with file upload support)
+// Departments: submit/revise answer for a question (with file upload support)
 router.post(
   '/questions/:questionId/answers',
-  requireRole('researcher'),
+  requireRole('departments'),
   upload.array('attachments', 5), // Allow up to 5 files
   [
     body('content').optional().isString(),
@@ -37,24 +37,24 @@ router.get('/answers/:answerId', canAccessAnswer, answerController.getOne);
 // Version history
 router.get('/answers/:answerId/versions', canAccessAnswer, answerController.getVersions);
 
-// Senior: delete answer
-router.delete('/answers/:answerId', seniorOnly, canAccessAnswer, answerController.deleteAnswer);
+// Pradhikaran Office: delete answer
+router.delete('/answers/:answerId', pradhikaranOfficeOnly, canAccessAnswer, answerController.deleteAnswer);
 
-// Senior: request revision
+// Pradhikaran Office: request revision
 router.post(
   '/answers/:answerId/request-revision',
-  seniorOnly,
+  pradhikaranOfficeOnly,
   canAccessAnswer,
   [body('revisionReason').optional().isString()],
   validate,
   answerController.requestRevision
 );
 
-// Senior: approve / reject answer
-router.post('/answers/:answerId/approve', seniorOnly, canAccessAnswer, compilationController.approveAnswer);
+// Pradhikaran Office: approve / reject answer
+router.post('/answers/:answerId/approve', pradhikaranOfficeOnly, canAccessAnswer, compilationController.approveAnswer);
 router.post(
   '/answers/:answerId/reject',
-  seniorOnly,
+  pradhikaranOfficeOnly,
   canAccessAnswer,
   [body('reason').optional().isString()],
   validate,

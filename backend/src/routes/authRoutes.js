@@ -12,7 +12,7 @@ router.post(
     body('email').isEmail().normalizeEmail(),
     body('password').isLength({ min: 6 }),
     body('name').trim().notEmpty(),
-    body('role').isIn(['senior_member', 'researcher']),
+    body('role').isIn(['pradhikaran_office', 'departments']),
     body('department').optional().trim(),
   ],
   validate,

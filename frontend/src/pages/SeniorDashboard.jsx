@@ -23,7 +23,8 @@ export default function SeniorDashboard() {
   const formatDate = (d) => {
     if (!d) return 'N/A';
     try {
-      return new Date(d).toLocaleDateString(undefined, { dateStyle: 'short', timeStyle: 'short' });
+      const date = new Date(d);
+      return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     } catch {
       return 'Invalid Date';
     }

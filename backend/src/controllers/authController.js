@@ -10,29 +10,66 @@ const generateToken = (id) =>
 
 exports.register = async (req, res) => {
   try {
-    const { email, password, name, role, department } = req.body;
+    const { email, password, name, role, department, institution, registrationStatus = 'approved' } = req.body;
     const existing = await User.findOne({ email });
     if (existing) {
       return res.status(400).json({ success: false, message: 'Email already registered' });
     }
+    
     // Department is required for new registrations
     if (!department || !department.trim()) {
       return res.status(400).json({ success: false, message: 'Department is required' });
     }
-    const user = await User.create({ email, password, name, role, department: department.trim() });
+    
+    // Institution is required for Department registrations
+    if (role === 'departments' && (!institution || !institution.trim())) {
+      return res.status(400).json({ success: false, message: 'Institution is required for department registrations' });
+    }
+    
+    const userData = {
+      email,
+      password,
+      name,
+      role,
+      department: department.trim(),
+      registrationStatus: role === 'departments' ? 'pending' : 'approved' // Departments start pending, Pradhikaran Office auto-approved
+    };
+    
+    // Add institution for departments
+    if (role === 'departments' && institution) {
+      userData.institution = institution.trim();
+    }
+    
+    const user = await User.create(userData);
     const token = generateToken(user._id);
+    
     auditLogger.log({
       userId: user._id,
       action: 'user_register',
       resourceType: 'User',
       resourceId: user._id,
+      metadata: { 
+        role: user.role, 
+        registrationStatus: user.registrationStatus,
+        department: user.department,
+        institution: user.institution
+      },
       ip: req.ip,
       userAgent: req.get('User-Agent'),
     });
+    
     res.status(201).json({
       success: true,
       token,
-      user: { id: user._id, email: user.email, name: user.name, role: user.role, department: user.department },
+      user: { 
+        id: user._id, 
+        email: user.email, 
+        name: user.name, 
+        role: user.role, 
+        department: user.department,
+        institution: user.institution,
+        registrationStatus: user.registrationStatus
+      },
     });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
@@ -49,19 +86,40 @@ exports.login = async (req, res) => {
     if (!user.isActive) {
       return res.status(401).json({ success: false, message: 'Account is disabled' });
     }
+    
+    // Check registration status for Department accounts
+    if (user.role === 'departments' && user.registrationStatus !== 'approved') {
+      return res.status(401).json({ 
+        success: false, 
+        message: 'Account pending approval. Please contact Pradhikaran Office.' 
+      });
+    }
+    
     const token = generateToken(user._id);
     auditLogger.log({
       userId: user._id,
       action: 'user_login',
       resourceType: 'User',
       resourceId: user._id,
+      metadata: { 
+        role: user.role, 
+        registrationStatus: user.registrationStatus 
+      },
       ip: req.ip,
       userAgent: req.get('User-Agent'),
     });
     res.json({
       success: true,
       token,
-      user: { id: user._id, email: user.email, name: user.name, role: user.role, department: user.department },
+      user: { 
+        id: user._id, 
+        email: user.email, 
+        name: user.name, 
+        role: user.role, 
+        department: user.department,
+        institution: user.institution,
+        registrationStatus: user.registrationStatus 
+      },
     });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });

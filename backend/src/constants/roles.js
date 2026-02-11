@@ -1,11 +1,11 @@
 /**
  * Role constants for RBAC++.
- * SENIOR_MEMBER: question owner, reviewer, compiler, approver
- * RESEARCHER: answer submitter, can only see own answers
+ * PRADHIKARAN_OFFICE: question owner, reviewer, compiler, approver, manages department registrations
+ * DEPARTMENTS: answer submitter, can only see own answers, requires approval for registration
  */
 const ROLES = {
-  SENIOR_MEMBER: 'senior_member',
-  RESEARCHER: 'researcher',
+  PRADHIKARAN_OFFICE: 'pradhikaran_office',
+  DEPARTMENTS: 'departments',
 };
 
 const QUESTION_STATUS = {

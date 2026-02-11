@@ -97,3 +97,48 @@
   color: var(--text-muted);
   font-size: 0.9rem;
 }
+
+.auth-header {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.role-badge {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+}
+
+.role-badge.pradhikaran-office {
+  background: #0d6efd;
+  color: white;
+  border: 2px solid #0b5ed7;
+}
+
+.role-badge.department {
+  background: #198754;
+  color: white;
+  border: 2px solid #157347;
+}
+
+.registration-info {
+  background: #fff3cd;
+  border: 1px solid #ffeaa7;
+  border-radius: 4px;
+  padding: 1rem;
+  margin: 1rem 0;
+}
+
+.registration-info p {
+  margin: 0;
+  color: #856404;
+  font-size: 0.9rem;
+}
+
+.form-input-disabled {
+  background-color: #f8f9fa;
+  cursor: not-allowed;
+}

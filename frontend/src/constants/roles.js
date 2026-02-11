@@ -3,8 +3,14 @@
  */
 
 export const ROLES = {
-  SENIOR_MEMBER: 'senior_member',
-  RESEARCHER: 'researcher',
+  PRADHIKARAN_OFFICE: 'pradhikaran_office',
+  DEPARTMENTS: 'departments',
+};
+
+export const REGISTRATION_STATUS = {
+  PENDING: 'pending',
+  APPROVED: 'approved',
+  REJECTED: 'rejected',
 };
 
 export const QUESTION_STATUS = {

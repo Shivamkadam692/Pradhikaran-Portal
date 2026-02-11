@@ -41,6 +41,20 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    registrationStatus: {
+      type: String,
+      enum: ['pending', 'approved', 'rejected'],
+      default: 'approved', // Default to approved for existing users and Pradhikaran Office
+    },
+    approvedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: false,
+    },
+    approvedAt: {
+      type: Date,
+      required: false,
+    },
   },
   { timestamps: true }
 );

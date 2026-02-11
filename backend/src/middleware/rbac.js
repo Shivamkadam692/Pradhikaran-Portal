@@ -1,6 +1,6 @@
 /**
  * RBAC++ middleware - role-based access control.
- * Restricts routes by role (senior_member | researcher).
+ * Restricts routes by role (pradhikaran_office | departments).
  */
 const { ROLES } = require('../constants/roles');
 
@@ -14,7 +14,7 @@ const requireRole = (...allowedRoles) => (req, res, next) => {
   next();
 };
 
-const seniorOnly = requireRole(ROLES.SENIOR_MEMBER);
-const researcherOnly = requireRole(ROLES.RESEARCHER);
+const pradhikaranOfficeOnly = requireRole(ROLES.PRADHIKARAN_OFFICE);
+const departmentsOnly = requireRole(ROLES.DEPARTMENTS);
 
-module.exports = { requireRole, seniorOnly, researcherOnly };
+module.exports = { requireRole, pradhikaranOfficeOnly, departmentsOnly };
