@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import * as questionsApi from '../api/questions';
+import * as usersApi from '../api/users';
 import './FormPages.css';
 
 export default function QuestionCreate() {
@@ -10,9 +11,33 @@ export default function QuestionCreate() {
     description: '',
     submissionDeadline: '',
     anonymousMode: true,
+    targetDepartment: '',
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [departments, setDepartments] = useState([]);
+  const [departmentsLoading, setDepartmentsLoading] = useState(true);
+
+  useEffect(() => {
+    loadDepartments();
+  }, []);
+
+  const loadDepartments = async () => {
+    try {
+      setDepartmentsLoading(true);
+      const res = await usersApi.getAllDepartments();
+      // Extract unique department names from the users
+      const uniqueDepartments = [...new Set(res.data
+        .filter(user => user.department && user.department.trim() !== '')
+        .map(user => user.department)
+        .filter(Boolean))];
+      setDepartments(uniqueDepartments);
+    } catch (err) {
+      console.error('Failed to load departments:', err);
+    } finally {
+      setDepartmentsLoading(false);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -63,6 +88,24 @@ export default function QuestionCreate() {
             rows={6}
             placeholder="Full description and requirements"
           />
+        </label>
+        <label>
+          Target Department
+          {departmentsLoading ? (
+            <div className="muted">Loading departments...</div>
+          ) : (
+            <select
+              value={form.targetDepartment}
+              onChange={(e) => setForm((f) => ({ ...f, targetDepartment: e.target.value }))}
+            >
+              <option value="">All Departments</option>
+              {departments.map((dept) => (
+                <option key={dept} value={dept}>
+                  {dept}
+                </option>
+              ))}
+            </select>
+          )}
         </label>
         <label>
           Submission deadline *

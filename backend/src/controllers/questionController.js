@@ -9,7 +9,7 @@ const auditLogger = require('../utils/auditLogger');
 // Senior: create question
 exports.create = async (req, res) => {
   try {
-    const { title, description, tags, difficulty, submissionDeadline, anonymousMode } = req.body;
+    const { title, description, tags, difficulty, submissionDeadline, anonymousMode, targetDepartment } = req.body;
     const question = await Question.create({
       title,
       description,
@@ -19,6 +19,7 @@ exports.create = async (req, res) => {
       anonymousMode: anonymousMode !== false,
       owner: req.user._id,
       ownerDepartment: req.user.department || '',
+      targetDepartment: targetDepartment || '',
       status: QUESTION_STATUS.DRAFT,
     });
     auditLogger.log({
@@ -26,7 +27,7 @@ exports.create = async (req, res) => {
       action: 'question_create',
       resourceType: 'Question',
       resourceId: question._id,
-      metadata: { title: question.title },
+      metadata: { title: question.title, targetDepartment: targetDepartment || 'All' },
       ip: req.ip,
       userAgent: req.get('User-Agent'),
     });
@@ -115,7 +116,7 @@ exports.listMine = async (req, res) => {
 };
 
 // Researcher: list open questions (no owner identity in anonymous mode)
-// Only show questions from the same department as the researcher
+// Only show questions targeted to the same department as the researcher
 exports.listOpen = async (req, res) => {
   try {
     const userDepartment = req.user.department || '';
@@ -123,9 +124,12 @@ exports.listOpen = async (req, res) => {
       status: QUESTION_STATUS.OPEN,
       submissionDeadline: { $gt: new Date() },
     };
-    // Only filter by department if user has a department set
+    // Only filter by target department if user has a department set
     if (userDepartment) {
-      filter.ownerDepartment = userDepartment;
+      filter.targetDepartment = userDepartment;
+    } else {
+      // If user has no department, show questions with no target department (All Departments)
+      filter.targetDepartment = '';
     }
     const questions = await Question.find(filter)
       .populate('owner', 'name role department')

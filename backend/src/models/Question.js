@@ -52,6 +52,13 @@ const questionSchema = new mongoose.Schema(
       trim: true,
       default: '',
     },
+    // Target department that this question is assigned to
+    targetDepartment: {
+      type: String,
+      required: false,
+      trim: true,
+      default: '',
+    },
     // Compiled final answer (set when senior compiles and approves)
     compiledAnswer: {
       content: String,

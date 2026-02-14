@@ -18,6 +18,7 @@ const auditLogSchema = new mongoose.Schema(
         'question_publish',
         'question_close',
         'question_complete',
+        'question_delete',
         'answer_submit',
         'answer_revise',
         'answer_approve',

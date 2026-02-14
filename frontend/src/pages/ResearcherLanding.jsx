@@ -26,17 +26,17 @@ export default function ResearcherLanding() {
 
         <div className="landing-features" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1.5rem', marginTop: '2rem' }}>
           <div className="feature-card" style={{ padding: '1.5rem', background: 'white', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
-            <h3 style={{ marginTop: 0 }}>📝 Answer Questions</h3>
-            <p style={{ color: '#666' }}>Submit answers to research questions from your department.</p>
+            <h3 style={{ marginTop: 0 }}>Answer Questions</h3>
+            <p style={{ color: '#666' }}>Submit answers to questions from your department.</p>
           </div>
           
           <div className="feature-card" style={{ padding: '1.5rem', background: 'white', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
-            <h3 style={{ marginTop: 0 }}>🔄 Revisions</h3>
+            <h3 style={{ marginTop: 0 }}>Revisions</h3>
             <p style={{ color: '#666' }}>Receive feedback and revise your answers as needed.</p>
           </div>
           
           <div className="feature-card" style={{ padding: '1.5rem', background: 'white', borderRadius: '8px', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
-            <h3 style={{ marginTop: 0 }}>📊 Track Progress</h3>
+            <h3 style={{ marginTop: 0 }}> Track Progress</h3>
             <p style={{ color: '#666' }}>Monitor the status of your submissions and versions.</p>
           </div>
         </div>
@@ -47,7 +47,7 @@ export default function ResearcherLanding() {
               <strong>Your Department:</strong> {user.department}
             </p>
             <p style={{ margin: '0.5rem 0 0 0', fontSize: '0.9rem', color: '#666' }}>
-              You can only view and answer questions from your department.
+              You can only view and answer questions for your department.
             </p>
           </div>
         )}

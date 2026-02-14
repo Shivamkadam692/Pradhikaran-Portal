@@ -16,7 +16,10 @@ export default function QuestionDetail() {
   const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
-    questionsApi.getOne(id).then((res) => setQuestion(res.data)).catch(() => setQuestion(null)).finally(() => setLoading(false));
+    questionsApi.getOne(id).then((res) => setQuestion(res.data)).catch((err) => {
+      console.error('Error loading question:', err);
+      setQuestion(null);
+    }).finally(() => setLoading(false));
   }, [id]);
 
   useEffect(() => {
@@ -81,17 +84,42 @@ export default function QuestionDetail() {
 
     setDeleting(true);
     try {
+      console.log('Attempting to delete question with ID:', id);
+      const token = localStorage.getItem('token');
+      console.log('Current token:', token ? 'Present' : 'Missing');
       await questionsApi.deleteQuestion(id);
+      console.log('Question deleted successfully');
       // Navigate back to dashboard
       navigate('/senior');
     } catch (error) {
-      alert('Failed to delete question: ' + error.message);
+      console.error('Error deleting question:', error);
+      console.error('Error response:', error.response);
+      if (error.response?.status === 401) {
+        alert('Your session has expired. Please log in again.');
+      } else if (error.response?.status === 403) {
+        alert('You do not have permission to delete this question.');
+      } else {
+        alert('Failed to delete question: ' + error.message);
+      }
     } finally {
       setDeleting(false);
     }
   };
 
-  if (loading || !question) return <div className="muted">Loading...</div>;
+  if (loading) return <div className="muted">Loading...</div>;
+  if (!question) return (
+    <div className="form-page">
+      <div className="detail-header">
+        <button onClick={() => navigate('/senior')} className="btn btn-ghost">
+          ← Back to dashboard
+        </button>
+        <h1>Question Not Found</h1>
+      </div>
+      <div className="form-error">
+        The question could not be loaded. It may not exist or you don't have permission to view it.
+      </div>
+    </div>
+  );
 
   const formatDate = (d) => {
     if (!d) return 'N/A';
@@ -116,6 +144,9 @@ export default function QuestionDetail() {
       <p className="detail-desc">{question.description}</p>
       <div className="detail-meta">
         <span>Deadline: {formatDate(question.submissionDeadline)}</span>
+        {question.targetDepartment && (
+          <span>Target Department: {question.targetDepartment}</span>
+        )}
       </div>
 
       {question.status === 'draft' && (
