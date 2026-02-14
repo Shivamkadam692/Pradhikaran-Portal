@@ -124,13 +124,25 @@ exports.listOpen = async (req, res) => {
       status: QUESTION_STATUS.OPEN,
       submissionDeadline: { $gt: new Date() },
     };
-    // Only filter by target department if user has a department set
+    
+    // If the question has a targetDepartment, only show it to users from that department
+    // Otherwise show to all departments (when targetDepartment is null, undefined, or empty)
     if (userDepartment) {
-      filter.targetDepartment = userDepartment;
+      filter.$or = [
+        { targetDepartment: userDepartment }, // Targeted to this department
+        { targetDepartment: null },          // Not targeted to any specific department
+        { targetDepartment: '' },            // Or empty string for all departments
+        { targetDepartment: { $exists: false } } // Or if field doesn't exist
+      ];
     } else {
       // If user has no department, show questions with no target department (All Departments)
-      filter.targetDepartment = '';
+      filter.$or = [
+        { targetDepartment: null },          // Not targeted to any specific department
+        { targetDepartment: '' },            // Or empty string for all departments
+        { targetDepartment: { $exists: false } } // Or if field doesn't exist
+      ];
     }
+    
     const questions = await Question.find(filter)
       .populate('owner', 'name role department')
       .sort({ submissionDeadline: 1 });

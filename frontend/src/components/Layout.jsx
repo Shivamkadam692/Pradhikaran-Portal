@@ -72,6 +72,7 @@ export default function Layout({ children }) {
           {isPradhikaranOffice && (
             <>
               <Link to="/pradhikaran/departments" className={location.pathname === '/pradhikaran/departments' ? 'active' : ''}>Departments</Link>
+              <Link to="/pradhikaran/departments/list" className={location.pathname === '/pradhikaran/departments/list' ? 'active' : ''}>All Departments</Link>
               <Link to="/pradhikaran/questions" className={location.pathname === '/pradhikaran/questions' ? 'active' : ''}>Q&A Management</Link>
               <Link to="/pradhikaran/questions/new">New Question</Link>
               <Link to="/pradhikaran/analytics" className={location.pathname === '/pradhikaran/analytics' ? 'active' : ''}>Analytics</Link>

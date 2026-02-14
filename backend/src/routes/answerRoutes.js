@@ -18,8 +18,8 @@ router.post(
   requireRole('departments'),
   upload.array('attachments', 5), // Allow up to 5 files
   [
-    body('content').optional().isString(),
-    body('revisionNote').optional().isString(),
+    body('content').optional().isString().withMessage('Content must be a string').isLength({ max: 10000 }).withMessage('Content must be less than 10,000 characters'),
+    body('revisionNote').optional().isString().withMessage('Revision note must be a string').isLength({ max: 500 }).withMessage('Revision note must be less than 500 characters'),
   ],
   validate,
   answerController.submit
@@ -48,7 +48,9 @@ router.post(
   '/answers/:answerId/request-revision',
   pradhikaranOfficeOnly,
   canAccessAnswer,
-  [body('revisionReason').optional().isString()],
+  [
+    body('revisionReason').optional().isString().withMessage('Revision reason must be a string').isLength({ max: 1000 }).withMessage('Revision reason must be less than 1000 characters')
+  ],
   validate,
   answerController.requestRevision
 );
@@ -59,7 +61,9 @@ router.post(
   '/answers/:answerId/reject',
   pradhikaranOfficeOnly,
   canAccessAnswer,
-  [body('reason').optional().isString()],
+  [
+    body('reason').optional().isString().withMessage('Rejection reason must be a string').isLength({ max: 1000 }).withMessage('Rejection reason must be less than 1000 characters')
+  ],
   validate,
   compilationController.rejectAnswer
 );

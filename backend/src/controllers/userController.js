@@ -23,7 +23,11 @@ exports.getPendingRegistrations = async (req, res) => {
     
     res.json({ success: true, data: pendingUsers });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    console.error('Error getting pending registrations:', err);
+    if (err.name === 'CastError') {
+      return res.status(400).json({ success: false, message: 'Invalid request parameters' });
+    }
+    res.status(500).json({ success: false, message: 'Internal server error while fetching pending registrations' });
   }
 };
 
@@ -90,7 +94,10 @@ exports.approveRegistration = async (req, res) => {
     res.json({ success: true, message: 'Registration approved successfully', data: user });
   } catch (err) {
     console.error('Error in approveRegistration:', err);
-    res.status(500).json({ success: false, message: err.message });
+    if (err.name === 'CastError') {
+      return res.status(400).json({ success: false, message: 'Invalid user ID format' });
+    }
+    res.status(500).json({ success: false, message: 'Internal server error during registration approval' });
   }
 };
 
@@ -158,7 +165,10 @@ exports.rejectRegistration = async (req, res) => {
     res.json({ success: true, message: 'Registration rejected successfully' });
   } catch (err) {
     console.error('Error in rejectRegistration:', err);
-    res.status(500).json({ success: false, message: err.message });
+    if (err.name === 'CastError') {
+      return res.status(400).json({ success: false, message: 'Invalid user ID format' });
+    }
+    res.status(500).json({ success: false, message: 'Internal server error during registration rejection' });
   }
 };
 
@@ -176,7 +186,8 @@ exports.getAllDepartments = async (req, res) => {
     
     res.json({ success: true, data: departments });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    console.error('Error getting all departments:', err);
+    res.status(500).json({ success: false, message: 'Internal server error while fetching departments' });
   }
 };
 
@@ -215,7 +226,11 @@ exports.toggleUserStatus = async (req, res) => {
       data: user 
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    console.error('Error toggling user status:', err);
+    if (err.name === 'CastError') {
+      return res.status(400).json({ success: false, message: 'Invalid user ID format' });
+    }
+    res.status(500).json({ success: false, message: 'Internal server error while toggling user status' });
   }
 };
 
@@ -234,14 +249,18 @@ exports.getUserById = async (req, res) => {
     
     res.json({ success: true, data: user });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    console.error('Error getting user by ID:', err);
+    if (err.name === 'CastError') {
+      return res.status(400).json({ success: false, message: 'Invalid user ID format' });
+    }
+    res.status(500).json({ success: false, message: 'Internal server error while fetching user' });
   }
 };
 
 // Update user information
 exports.updateUser = async (req, res) => {
   try {
-    const { name, department, institution } = req.body;
+    const { name, department, institution, isActive, registrationStatus } = req.body;
     
     // Users can only update their own info, Pradhikaran Office can update any user
     const user = await User.findById(req.params.userId);
@@ -253,9 +272,12 @@ exports.updateUser = async (req, res) => {
       return res.status(403).json({ success: false, message: 'Access denied' });
     }
     
-    if (name) user.name = name;
+    // Update fields if provided
+    if (name) user.name = name.trim();
     if (department) user.department = department.trim();
     if (institution && user.role === 'departments') user.institution = institution.trim();
+    if (isActive !== undefined) user.isActive = isActive;
+    if (registrationStatus) user.registrationStatus = registrationStatus;
     
     await user.save();
     
@@ -278,6 +300,18 @@ exports.updateUser = async (req, res) => {
       data: user 
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    console.error('Error updating user:', err);
+    if (err.name === 'CastError') {
+      return res.status(400).json({ success: false, message: 'Invalid user ID format' });
+    }
+    if (err.name === 'ValidationError') {
+      const errors = Object.values(err.errors).map(e => e.message);
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Validation error', 
+        errors 
+      });
+    }
+    res.status(500).json({ success: false, message: 'Internal server error while updating user' });
   }
 };

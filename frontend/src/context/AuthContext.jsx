@@ -19,7 +19,8 @@ export function AuthProvider({ children }) {
         const u = res?.user;
         if (u) setUser({ ...u, id: u.id || u._id });
       })
-      .catch(() => {
+      .catch((error) => {
+        console.error('Auth check failed:', error);
         localStorage.removeItem('token');
         localStorage.removeItem('user');
       })
@@ -27,19 +28,29 @@ export function AuthProvider({ children }) {
   }, []);
 
   const login = async (email, password) => {
-    const res = await authApi.login(email, password);
-    localStorage.setItem('token', res.token);
-    localStorage.setItem('user', JSON.stringify(res.user));
-    setUser(res.user);
-    return res;
+    try {
+      const res = await authApi.login(email, password);
+      localStorage.setItem('token', res.token);
+      localStorage.setItem('user', JSON.stringify(res.user));
+      setUser(res.user);
+      return res;
+    } catch (error) {
+      console.error('Login failed:', error);
+      throw error;
+    }
   };
 
   const register = async (data) => {
-    const res = await authApi.register(data);
-    localStorage.setItem('token', res.token);
-    localStorage.setItem('user', JSON.stringify(res.user));
-    setUser(res.user);
-    return res;
+    try {
+      const res = await authApi.register(data);
+      localStorage.setItem('token', res.token);
+      localStorage.setItem('user', JSON.stringify(res.user));
+      setUser(res.user);
+      return res;
+    } catch (error) {
+      console.error('Registration failed:', error);
+      throw error;
+    }
   };
 
   const logout = () => {

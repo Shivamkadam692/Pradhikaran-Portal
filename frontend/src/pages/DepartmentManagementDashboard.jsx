@@ -123,6 +123,57 @@ export default function DepartmentManagementDashboard() {
         </div>
       </div>
 
+      {/* Top section - All Departments Overview */}
+      <div className="section">
+        <div className="section-header">
+          <h2>All Departments</h2>
+          <div className="section-actions">
+            <span className="item-count">{allDepartments.length} departments</span>
+          </div>
+        </div>
+        
+        {allDepartments.length === 0 ? (
+          <div className="empty-state">
+            <p>No departments registered yet</p>
+          </div>
+        ) : (
+          <div className="card-grid">
+            {allDepartments.slice(0, 5).map((user) => (
+              <div key={user._id} className="card compact">
+                <div className="card-head">
+                  <h3 className="card-title truncate">{user.name}</h3>
+                  <div className="status-group">
+                    {getStatusBadge(user.registrationStatus)}
+                    <span className={`status-badge ${user.isActive === false ? 'status-inactive' : 'status-active'}`}>
+                      {user.isActive === false ? 'Inactive' : 'Active'}
+                    </span>
+                  </div>
+                </div>
+                <div className="card-content compact">
+                  <p className="truncate"><strong>Dept:</strong> {user.department}</p>
+                  <p className="truncate"><strong>Inst:</strong> {user.institution || 'N/A'}</p>
+                  <p><strong>Since:</strong> {formatDate(user.createdAt).split(' ')[0]}</p>
+                </div>
+              </div>
+            ))}
+            {allDepartments.length > 5 && (
+              <div className="card compact view-all-card">
+                <div className="card-content center">
+                  <Link to="#" 
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setActiveTab('all');
+                    }}
+                    className="view-all-link">
+                    View all {allDepartments.length} departments
+                  </Link>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
       <div className="dashboard-stats">
         <div className="stat-card">
           <h3>{pendingRegistrations.length}</h3>

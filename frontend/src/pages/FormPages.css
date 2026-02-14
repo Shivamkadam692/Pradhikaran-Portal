@@ -287,3 +287,119 @@
 .analytics-list li {
   padding: 0.35rem 0;
 }
+
+/* Department List View Styles */
+.departments-layout {
+  display: flex;
+  gap: 2rem;
+  margin-top: 1.5rem;
+}
+
+.departments-sidebar {
+  width: 300px;
+  flex-shrink: 0;
+}
+
+.sidebar-header {
+  margin-bottom: 1rem;
+}
+
+.departments-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.department-card {
+  padding: 1rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.department-card:hover {
+  border-color: var(--accent);
+  box-shadow: var(--shadow);
+}
+
+.department-card.selected {
+  border-color: var(--accent);
+  background: var(--accent-light);
+}
+
+.department-info {
+  margin-bottom: 0.5rem;
+}
+
+.department-name {
+  margin: 0 0 0.25rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.department-dept,
+.department-inst {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.department-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.department-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.department-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.department-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.info-item label {
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 0.25rem;
+  font-size: 0.9rem;
+}
+
+.info-item span {
+  color: var(--text-muted);
+  word-break: break-word;
+}
+
+.no-selection {
+  text-align: center;
+  padding: 3rem;
+  color: var(--text-muted);
+}
+
+.no-selection h3 {
+  margin: 0 0 0.5rem;
+  color: var(--text);
+}

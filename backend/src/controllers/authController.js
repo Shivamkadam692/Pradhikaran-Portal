@@ -11,19 +11,37 @@ const generateToken = (id) =>
 exports.register = async (req, res) => {
   try {
     const { email, password, name, role, department, institution, registrationStatus = 'approved' } = req.body;
+    
+    // Validate required fields
+    if (!email || !password || !name || !role || !department) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Required fields are missing' 
+      });
+    }
+    
     const existing = await User.findOne({ email });
     if (existing) {
-      return res.status(400).json({ success: false, message: 'Email already registered' });
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Email already registered' 
+      });
     }
     
     // Department is required for new registrations
     if (!department || !department.trim()) {
-      return res.status(400).json({ success: false, message: 'Department is required' });
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Department is required' 
+      });
     }
     
     // Institution is required for Department registrations
     if (role === 'departments' && (!institution || !institution.trim())) {
-      return res.status(400).json({ success: false, message: 'Institution is required for department registrations' });
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Institution is required for department registrations' 
+      });
     }
     
     const userData = {
@@ -72,19 +90,48 @@ exports.register = async (req, res) => {
       },
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    console.error('Registration error:', err);
+    // Handle specific error types
+    if (err.name === 'ValidationError') {
+      const errors = Object.values(err.errors).map(e => e.message);
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Validation error', 
+        errors 
+      });
+    }
+    
+    res.status(500).json({ 
+      success: false, 
+      message: 'Internal server error during registration' 
+    });
   }
 };
 
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
+    
+    // Validate required fields
+    if (!email || !password) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Email and password are required' 
+      });
+    }
+    
     const user = await User.findOne({ email }).select('+password');
     if (!user || !(await user.comparePassword(password))) {
-      return res.status(401).json({ success: false, message: 'Invalid email or password' });
+      return res.status(401).json({ 
+        success: false, 
+        message: 'Invalid email or password' 
+      });
     }
     if (!user.isActive) {
-      return res.status(401).json({ success: false, message: 'Account is disabled' });
+      return res.status(401).json({ 
+        success: false, 
+        message: 'Account is disabled' 
+      });
     }
     
     // Check registration status for Department accounts
@@ -122,14 +169,40 @@ exports.login = async (req, res) => {
       },
     });
   } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
+    console.error('Login error:', err);
+    if (err.name === 'CastError') {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Invalid request parameters' 
+      });
+    }
+    
+    res.status(500).json({ 
+      success: false, 
+      message: 'Internal server error during login' 
+    });
   }
 };
 
 exports.me = async (req, res) => {
-  const u = req.user;
-  res.json({
-    success: true,
-    user: { id: u._id, _id: u._id, email: u.email, name: u.name, role: u.role, department: u.department },
-  });
+  try {
+    const u = req.user;
+    res.json({
+      success: true,
+      user: { 
+        id: u._id, 
+        _id: u._id, 
+        email: u.email, 
+        name: u.name, 
+        role: u.role, 
+        department: u.department 
+      },
+    });
+  } catch (err) {
+    console.error('Get user info error:', err);
+    res.status(500).json({ 
+      success: false, 
+      message: 'Internal server error fetching user info' 
+    });
+  }
 };

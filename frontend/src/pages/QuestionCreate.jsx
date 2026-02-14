@@ -1,17 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import * as questionsApi from '../api/questions';
 import * as usersApi from '../api/users';
 import './FormPages.css';
 
 export default function QuestionCreate() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [form, setForm] = useState({
-    title: '',
+    title: searchParams.get('departmentName') ? `Question for ${decodeURIComponent(searchParams.get('departmentName') || '')}` : '',
     description: '',
     submissionDeadline: '',
     anonymousMode: true,
-    targetDepartment: '',
+    targetDepartment: searchParams.get('targetDepartment') || '',
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -26,12 +27,7 @@ export default function QuestionCreate() {
     try {
       setDepartmentsLoading(true);
       const res = await usersApi.getAllDepartments();
-      // Extract unique department names from the users
-      const uniqueDepartments = [...new Set(res.data
-        .filter(user => user.department && user.department.trim() !== '')
-        .map(user => user.department)
-        .filter(Boolean))];
-      setDepartments(uniqueDepartments);
+      setDepartments(res.data || []);
     } catch (err) {
       console.error('Failed to load departments:', err);
     } finally {
@@ -49,6 +45,8 @@ export default function QuestionCreate() {
         tags: [],
         difficulty: 'medium',
         submissionDeadline: new Date(form.submissionDeadline).toISOString(),
+        // Use the department name instead of department ID for targetDepartment
+        targetDepartment: form.targetDepartment, // This should be the department name
       };
       const res = await questionsApi.create(payload);
       const q = res.data;
@@ -100,8 +98,8 @@ export default function QuestionCreate() {
             >
               <option value="">All Departments</option>
               {departments.map((dept) => (
-                <option key={dept} value={dept}>
-                  {dept}
+                <option key={dept._id} value={dept.department}>
+                  {dept.name} ({dept.department})
                 </option>
               ))}
             </select>

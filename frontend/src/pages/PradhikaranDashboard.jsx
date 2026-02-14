@@ -219,9 +219,6 @@ export default function PradhikaranDashboard() {
                     >
                       {user.isActive ? 'Deactivate' : 'Activate'}
                     </button>
-                    <Link to={`/pradhikaran/users/${user._id}`} className="btn btn-ghost">
-                      View Details
-                    </Link>
                   </div>
                 </div>
               ))}

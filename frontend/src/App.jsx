@@ -18,6 +18,7 @@ import QuestionDetail from './pages/QuestionDetail';
 import AnswerEditor from './pages/AnswerEditor';
 import ReviewFeedback from './pages/ReviewFeedback';
 import QuestionEdit from './pages/QuestionEdit';
+import DepartmentListView from './pages/DepartmentListView';
 
 function ProtectedRoute({ children, allowedRoles }) {
   const { user, loading } = useAuth();
@@ -87,10 +88,26 @@ export default function App() {
         }
       />
       <Route
+        path="/senior/questions/:id/review"
+        element={
+          <ProtectedRoute allowedRoles={['pradhikaran_office']}>
+            <Layout><ReviewFeedback /></Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
         path="/pradhikaran/departments"
         element={
           <ProtectedRoute allowedRoles={['pradhikaran_office']}>
             <Layout><DepartmentManagementDashboard /></Layout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/pradhikaran/departments/list"
+        element={
+          <ProtectedRoute allowedRoles={['pradhikaran_office']}>
+            <Layout><DepartmentListView /></Layout>
           </ProtectedRoute>
         }
       />
