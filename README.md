@@ -47,7 +47,7 @@ Open **http://localhost:3000**. Use the proxy: `/api` and `/socket.io` go to the
 ## Roles
 
 - **Senior Member**: Create questions, set deadlines, review answers privately, add inline comments, request revisions, compile final answer, approve & complete, view analytics.
-- **Researcher**: View open questions, submit answers, see inline feedback, revise and resubmit, track approval/rejection, version history.
+- **Researcher**: View open questions, submit answers, see inline feedback, revise and resubmit, track approval/rejection
 
 ## Core Rules
 
