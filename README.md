@@ -1,6 +1,6 @@
 # Private Research Collaboration Platform
 
-A production-style **MERN stack** application where **Senior Members** post questions and **Researchers** submit answers. Includes private review, inline feedback, revision cycles, answer compilation, approval workflow, anonymous mode, version history, audit logs, real-time updates (Socket.IO), and strict **RBAC++**.
+A production-style **MERN stack** application where **Senior Members** post questions and **Researchers** submit answers. Includes private review, inline feedback, revision cycles, answer compilation, approval workflow, anonymous mode, version history, audit logs
 
 ## Tech Stack
 
